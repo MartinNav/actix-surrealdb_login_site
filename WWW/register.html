@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<style>
+    @import url('https://fonts.cdnfonts.com/css/canavar');
+    body {
+        background-color: #1f1f25;
+        color: whitesmoke;
+    }
+    
+    h1 {
+        font-size: 25mm;
+        text-align: center;
+        font-family: 'CANAVAR', sans-serif;
+    }
+    
+    form {
+        padding-left: 30%;
+        font-family: 'CANAVAR', sans-serif;
+    }
+    
+    input {
+        color: red;
+        background-color: black;
+        height: 2em;
+        width: 25em;
+        font-family: 'CANAVAR', sans-serif;
+    }
+    
+    button {
+        color: white;
+        background-color: grey;
+        font-family: 'CANAVAR', sans-serif;
+        margin: 15px;
+        font-size: 1.5em;
+    }
+</style>
+
+<body>
+    <h1>Register</h1>
+    <form action="/regact" method="post">
+        <p>Username:</p>
+        <input type="text" name="uname">
+        <p>Password:</p>
+        <input type="password" name="psw" id="">
+        <br>
+        <br>
+        <button type="submit">SUBMIT</button>
+    </form>
+</body>
+
+</html>
