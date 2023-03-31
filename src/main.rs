@@ -55,6 +55,7 @@ async fn login_activity(param:actix_web::web::Form<db::User>)->HttpResponse{
         }
         _=>{}
     }
+
     HttpResponse::SeeOther().insert_header(("Location","/login")).finish()
 }
 
@@ -76,7 +77,7 @@ async fn register_activity(param: actix_web::web::Form<db::User>)->HttpResponse{
     ))
     .await
     .unwrap();
-
+    
     HttpResponse::SeeOther().insert_header(("Location","/login")).finish()
 }
 
