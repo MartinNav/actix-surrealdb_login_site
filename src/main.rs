@@ -37,9 +37,9 @@ async fn login()-> impl Responder{
 async fn login_activity(param:actix_web::web::Form<db::User>)->HttpResponse{
     let mut db = db::create_db().await;
     let user_login =db::User{
+        id:None,
         uname:param.uname.clone(),
         psw:param.psw.clone(),
-        token:param.token.clone()
     };
     let db_res:Option<db::User> = db.find_one("SELECT * FROM user WHERE uname = $uname;".to_owned(),
      serde_json::json!({"uname" : user_login.uname}))
@@ -51,7 +51,7 @@ async fn login_activity(param:actix_web::web::Form<db::User>)->HttpResponse{
             if u_db.uname == user_login.uname && u_db.psw == user_login.psw{
                 //TODO: Unique cookies for login
                 // for now there will be just default login cookie and that is not secure
-                return HttpResponse::SeeOther().cookie(Cookie::build("acces", "granted").expires(None).finish()).insert_header(("Location","/restricted")).finish();
+                return HttpResponse::SeeOther().cookie(Cookie::build("acces", u_db.id.unwrap_or("err".to_string())).expires(None).finish()).insert_header(("Location","/restricted")).finish();
             }
         }
         _=>{}
@@ -70,7 +70,7 @@ async fn register_activity(param: actix_web::web::Form<db::User>)->HttpResponse{
     let mut db = db::create_db().await;
 
 
-    db.send_query("CREATE user SET uname = $uname, psw = $psw;".to_owned(), //Even when it displys nosense it works
+    db.send_query("CREATE user SET uname = $uname, psw = $psw;".to_owned(), 
     serde_json::json!(
         {"uname":user,
         "psw":password
@@ -89,11 +89,18 @@ async fn not_found()->HttpResponse{
 #[actix_web::get("/restricted")]
 async fn restricted(req: actix_web::HttpRequest)->HttpResponse{
     let acces_cookie = req.cookie("acces");
-    match acces_cookie {
-        Some(ac)=>{
-            if ac.value() == "granted"{
+    
+    let mut db = db::create_db().await;
+
+    let db_res:Option<db::User> = db.find_one("SELECT * FROM user WHERE id = $id;".to_owned(),
+     serde_json::json!({"id" : acces_cookie.unwrap().value()}))
+     .await
+     .unwrap();
+
+    match db_res {
+        Some(_user)=>{
                 return HttpResponse::Accepted().body(load::safe_read_file("WWW/restricted.html".to_string()));
-            }
+
         }
         _=>{}
     }

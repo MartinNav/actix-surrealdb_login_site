@@ -3,9 +3,9 @@ use tokio::runtime::Runtime;
 
 #[derive(serde::Deserialize,Debug)]
 pub struct User{
+    pub id:Option<String>,
     pub uname:String,
     pub psw:String,
-    pub token:Option<String>,
 }
 
 
