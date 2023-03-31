@@ -20,8 +20,6 @@ pub struct User{
 /// The data will be saved only in your **RAM** not disc/SSD
 /// 
 pub async fn create_db()->surreal_simple_client::SurrealClient{
-//    let rt = Runtime::new().expect("Unable to start tokio runtime");
-
     
     let mut client = 
         surreal_simple_client::SurrealClient::new("ws://localhost:8000/rpc")    

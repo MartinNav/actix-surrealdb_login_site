@@ -7,7 +7,8 @@ use surreal_simple_client::SurrealClient;
 use std::sync::Mutex;
 mod load;
 mod db;
-//Caching pages
+//These global variables exist just because loading the files each time the request comes is to time consuming
+//file content will be loaded only on the first page load
 lazy_static!(
     #[derive(Debug)]
     static ref INDEX_HTML:String = load::safe_read_file("WWW/index.html".to_string());
