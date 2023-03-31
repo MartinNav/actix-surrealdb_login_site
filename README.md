@@ -6,3 +6,4 @@ and make sure you have started it with following command
 ```
 surreal start --log trace --user authsite --pass pa55w0rd memory
 ```
+You will have to have the [SurrealDB](https://surrealdb.com/) installed on your machine to use this application.
