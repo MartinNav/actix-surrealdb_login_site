@@ -1,14 +1,11 @@
 use tokio::runtime::Runtime;
 
-
-#[derive(serde::Deserialize,Debug)]
-pub struct User{
-    pub id:Option<String>,
-    pub uname:String,
-    pub psw:String,
+#[derive(serde::Deserialize, Debug)]
+pub struct User {
+    pub id: Option<String>,
+    pub uname: String,
+    pub psw: String,
 }
-
-
 
 ///# Create DB
 /// this function creates connection to surraelDB
@@ -16,24 +13,23 @@ pub struct User{
 /// In terminal before you run this application you have to write
 /// ```
 /// surreal start --log trace --user authsite --pass pa55w0rd memory
-/// ``` 
+/// ```
 /// The data will be saved only in your **RAM** not disc/SSD
-/// 
-pub async fn create_db()->surreal_simple_client::SurrealClient{
-    
-    let mut client = 
-        surreal_simple_client::SurrealClient::new("ws://localhost:8000/rpc")    
-    .await
-    .expect("Connection to DB can not be created");
+///
+pub async fn create_db() -> surreal_simple_client::SurrealClient {
+    let mut client = surreal_simple_client::SurrealClient::new("ws://localhost:8000/rpc")
+        .await
+        .expect("Connection to DB can not be created");
 
+    client
+        .signin("authsite", "pa55w0rd")
+        .await
+        .expect("Unable to authenticate");
 
-        client.signin("authsite", "pa55w0rd")
-    .await
-    .expect("Unable to authenticate");
+    client
+        .use_namespace("site", "auth")
+        .await
+        .expect("Unable to setup namespase & DB");
 
-        client.use_namespace("site", "auth")
-    .await
-    .expect("Unable to setup namespase & DB");
-    
     client
 }

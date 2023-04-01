@@ -1,8 +1,3 @@
-
-
-
-
-
 ///Wrapper over `std::fs::read()`, you have to handle the errors by your self
 pub fn read_file(dir: String) -> Result<String, std::io::Error> {
     let content = String::from_utf8_lossy(&std::fs::read(dir)?).to_string();
