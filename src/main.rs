@@ -1,6 +1,6 @@
 use actix_web::{self, App, HttpResponse, HttpServer, Responder};
 use cookie::Cookie;
-use db::User;
+use db::{User, create_db};
 use lazy_static::lazy_static;
 use serde;
 use std::sync::Mutex;
@@ -17,8 +17,8 @@ lazy_static!(
     #[derive(Debug)]
     static ref REGISTER_HTML:String = load::safe_read_file("WWW/register.html".to_string());
 
-
 );
+static DB:once_cell::sync::OnceCell<Mutex<SurrealClient>>=once_cell::sync::OnceCell::new();
 
 #[actix_web::get("/")]
 async fn index_page() -> impl Responder {
@@ -31,13 +31,14 @@ async fn login() -> impl Responder {
 }
 
 async fn login_activity(param: actix_web::web::Form<db::User>) -> HttpResponse {
-    let mut db = db::create_db().await;
+    //let mut db = db::create_db().await;
     let user_login = db::User {
         id: None,
         uname: param.uname.clone(),
         psw: param.psw.clone(),
     };
-    let db_res: Option<db::User> = db
+    let db_res: Option<db::User> =// db
+        DB.get().unwrap().lock().unwrap()
         .find_one(
             "SELECT * FROM user WHERE uname = $uname;".to_owned(),
             serde_json::json!({"uname" : user_login.uname}),
@@ -74,10 +75,10 @@ async fn register() -> impl Responder {
 }
 
 async fn register_activity(param: actix_web::web::Form<db::User>) -> HttpResponse {
-    let (mut user, mut password) = (param.uname.clone(), param.psw.clone());
-    let mut db = db::create_db().await;
-
-    db.send_query(
+    let (user,password) = (param.uname.clone(), param.psw.clone());
+    //let mut db = db::create_db().await;
+    DB.get().unwrap().lock().unwrap()
+    .send_query(
         "CREATE user SET uname = $uname, psw = $psw;".to_owned(),
         serde_json::json!(
             {"uname":user,
@@ -101,9 +102,10 @@ async fn not_found() -> HttpResponse {
 async fn restricted(req: actix_web::HttpRequest) -> HttpResponse {
     let acces_cookie = req.cookie("acces");
 
-    let mut db = db::create_db().await;
+    //let mut db = db::create_db().await;
 
-    let db_res: Option<db::User> = db
+    let db_res: Option<db::User> = 
+    DB.get().unwrap().lock().unwrap()
         .find_one(
             "SELECT * FROM user WHERE id = $id;".to_owned(),
             serde_json::json!({"id" : acces_cookie.unwrap().value()}),
@@ -129,7 +131,7 @@ async fn restricted(req: actix_web::HttpRequest) -> HttpResponse {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     //println!("Hello, world!");
-
+    DB.set(Mutex::new(create_db().await));
     HttpServer::new(|| {
         App::new()
             .service(index_page)

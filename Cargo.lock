@@ -243,6 +243,7 @@ dependencies = [
  "actix-web",
  "cookie",
  "lazy_static",
+ "once_cell",
  "serde",
  "serde_json",
  "surreal-simple-client",
