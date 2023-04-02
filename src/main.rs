@@ -49,8 +49,6 @@ async fn login_activity(param: actix_web::web::Form<db::User>) -> HttpResponse {
     match db_res {
         Some(u_db) => {
             if u_db.uname == user_login.uname && u_db.psw == user_login.psw {
-                //TODO: Unique cookies for login
-                // for now there will be just default login cookie and that is not secure
                 return HttpResponse::SeeOther()
                     .cookie(
                         Cookie::build("acces", u_db.id.unwrap_or("err".to_string()))
@@ -125,12 +123,9 @@ async fn restricted(req: actix_web::HttpRequest) -> HttpResponse {
         .finish()
 }
 
-///This project is not secured nor scalable,
-///because it does not clean its own db connections and it also does use the same authentication cookie for all sessions of given user
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    //println!("Hello, world!");
     DB.set(Mutex::new(create_db().await));
     HttpServer::new(|| {
         App::new()
