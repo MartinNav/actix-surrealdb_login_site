@@ -1,4 +1,3 @@
-use tokio::runtime::Runtime;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct User {

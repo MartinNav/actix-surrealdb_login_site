@@ -1,5 +1,5 @@
 use actix_web::{self, App, HttpResponse, HttpServer, Responder};
-use cookie::Cookie;
+use cookie::{Cookie, time::OffsetDateTime};
 use db::{User, create_db};
 use lazy_static::lazy_static;
 use serde;
@@ -66,7 +66,10 @@ async fn login_activity(param: actix_web::web::Form<db::User>) -> HttpResponse {
         .insert_header(("Location", "/login"))
         .finish()
 }
-
+#[actix_web::get("/logout")]
+async fn logout()->HttpResponse{
+    HttpResponse::SeeOther().cookie(Cookie::build("acces", "none").expires(OffsetDateTime::now_utc()).finish()).insert_header(("Location","/")).finish()
+}
 #[actix_web::get("/register")]
 async fn register() -> impl Responder {
     HttpResponse::Ok().body(format!("{}", REGISTER_HTML.as_str()))
@@ -106,7 +109,7 @@ async fn restricted(req: actix_web::HttpRequest) -> HttpResponse {
     DB.get().unwrap().lock().unwrap()
         .find_one(
             "SELECT * FROM user WHERE id = $id;".to_owned(),
-            serde_json::json!({"id" : acces_cookie.unwrap().value()}),
+            serde_json::json!({"id" : acces_cookie.unwrap_or(Cookie::build("acces", "none").finish()).value()}),
         )
         .await
         .unwrap();
@@ -132,6 +135,7 @@ async fn main() -> std::io::Result<()> {
             .service(index_page)
             .service(login)
             .service(register)
+            .service(logout)
             .route("/regact", actix_web::web::post().to(register_activity))
             .route("/logact", actix_web::web::post().to(login_activity))
             .service(restricted)
